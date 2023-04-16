@@ -10,6 +10,7 @@ import {
     Legend,
   } from 'chart.js';
   import { Line } from 'react-chartjs-2';
+  import axios from "axios";
 
 ChartJS.register(
     CategoryScale,
@@ -20,6 +21,8 @@ ChartJS.register(
     Tooltip,
     Legend
 );
+
+const URL = 'http://localhost:8080/';
 
 const Graphic = () => {
     const [showForm, setShowForm] = useState(false);
@@ -41,47 +44,29 @@ const Graphic = () => {
     const handleSubmit = (event) => {
         event.preventDefault();
 
-        const formData = event.currentTarget;
-        const tsBefore = formData.tsBefore;
-        const tsAfter = formData.tsAfter;
-        const type = formData.type;
-        const id = formData.id;
-        const limit = formData.limit;
-        const final_url = URL + '/entities/active'
+        const final_url = URL + 'graph/' + id + '?tsBefore=' + tsBefore + '&tsAfter=' + tsAfter + '&type=' + type;
 
-        const newPoints = [{ ts: 1, value: 10 }, { ts: 2, value: 20 }, { ts: 3, value: 12 }, { ts: 4, value: 18 }]
-        const labels = newPoints.map(p => p.ts);
 
-        const newData = {
-            labels,
-            datasets: [
-              {
-                data: newPoints.map(p => p.value),
-                borderColor: 'rgb(255, 99, 132)',
-                backgroundColor: 'rgba(255, 99, 132, 0.5)',
-              }
-            ],
-          };
+        axios.get(final_url)
+            .then(response => {
+                const newPoints = response.data.map(d => { return {ts: d.ts, value: d.value}})
+                const labels = newPoints.map(p => p.ts);
 
-          
-        setShowForm(false);
-        setShowData(true);
-        setData(newData);
+                const newData = {
+                    labels,
+                    datasets: [
+                        {
+                            data: newPoints.map(p => p.value),
+                            borderColor: 'rgb(255, 99, 132)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        }
+                    ],
+                };
 
-        //   axios.get(final_url)
-        //   .then(response => {
-        //         const newBeforeData = response.data.map((e) => {
-
-        //         });
-        //         const newAfterData = response.data.map((e) => {
-
-        //         });
-
-        //         setAfterData(newAfterData);
-        //         setBeforeData(newBeforeData);
-        //         setShowForm(false);
-        //         setShowData(true);
-        //   });
+                setShowForm(false);
+                setShowData(true);
+                setData(newData);
+            });
     }
 
     return (

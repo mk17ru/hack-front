@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const URL = 'localhost:8080/';
+const URL = 'http://localhost:8080/';
 
 const Diff = () => {
     const [showForm, setShowForm] = useState(false);
@@ -22,36 +22,22 @@ const Diff = () => {
   
     const handleSubmit = (event) => {
       event.preventDefault();
+      const final_url = URL + 'statistics?tsBefore=' + tsBefore + '&tsAfter=' + tsAfter + '&type=' + type + '&limit=' + limit;
 
-      const formData = event.currentTarget;
-      const tsBefore = formData.tsBefore;
-      const tsAfter = formData.tsAfter;
-      const type = formData.type;
-      const limit = formData.limit;
-      const final_url = URL + '/entities/active';
+      axios.get(final_url)
+      .then(response => {
+          const newBeforeData = response.data.map(
+                d => {return {id: d.methodId, name: d.methodName, valueBefore: d.avgBefore}}
+          );
+          const newAfterData = response.data.map(
+              d => {return {id: d.methodId, name: d.methodName, valueAfter: d.avgAfter, diff: d.percent}}
+          );
 
-      const newBeforeData = [{id: 1, name: 'aboba', valueBefore: 10}, {id: 2, name: 'aboba', valueBefore: 20}]
-      const newAfterData = [{id: 2, name: 'aboba', valueAfter: 20, diff: 30}, {id: 1, name: 'aboba', valueAfter: 10, diff: 20}, {id: 2, name: 'aboba', valueAfter: 20, diff: -2}]
-      
-      setAfterData(newAfterData);
-      setBeforeData(newBeforeData);
-      setShowForm(false);
-      setShowData(true);
-
-    //   axios.get(final_url)
-    //   .then(response => {
-    //         const newBeforeData = response.data.map((e) => {
-
-    //         });
-    //         const newAfterData = response.data.map((e) => {
-                
-    //         });
-            
-    //         setAfterData(newAfterData);
-    //         setBeforeData(newBeforeData);
-    //         setShowForm(false);
-    //         setShowData(true);
-    //   });
+          setAfterData(newAfterData);
+          setBeforeData(newBeforeData);
+          setShowForm(false);
+          setShowData(true);
+      });
     }
   
     return (
